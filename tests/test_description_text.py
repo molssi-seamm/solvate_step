@@ -38,200 +38,20 @@ def test_git_revision():
 def test_description_text_default(instance):
     """Test the default description text"""
 
-    assert re.fullmatch(
-        (
-            r'Step 1: Solvate  [-+.0-9a-z]+\n'
-            r'    Creating a cubic supercell with a density of 0.7 g/ml '
-            r'containing about 2000\n'
-            r'    atoms'
-        ),
-        instance.description_text()
-    ) is not None
-
-
-def test_description_text_expr_expr(instance):
-    """Test the default description text"""
+    P = solvate_step.SolvateParameters()
+    text = instance.description_text(P.values_to_dict())
+    print(text)
 
     assert re.fullmatch(
         (
             r'Step 1: Solvate  [-+.0-9a-z]+\n'
-            r'    Creating a cubic supercell with the method given by '
-            r'\$method and a submethod\n'
-            r'    given by \$submethod'
+            r'    Solvate the system making it a periodic system filled with '
+            r'water, using the\n'
+            r'    SPC model. The cell volume is fixed and will be filled to a '
+            r'density of 1.0\n'
+            r'    g/ml.'
         ),
-        instance.description_text(
-            {
-                'method': '$method',
-                'submethod': '$submethod'
-            }
-        )
+        text
     ) is not None
 
 
-def test_description_text_cubic_expr(instance):
-    """Test the description text"""
-
-    reference = r"""Step 1: Solvate  [-+.0-9a-z]+
-    Creating a cubic supercell 10.0 Å on a side and a submethod given by
-    \$submethod"""
-
-    result = instance.description_text(
-        {
-            'method': 'cubic',
-            'size of cubic cell': '10.0 Å',
-            'submethod': '$submethod'
-        }
-    )
-
-    # print(result)
-
-    assert re.fullmatch(reference, result) is not None
-
-
-def test_description_text_cubic_density(instance):
-    """Test the description text"""
-
-    reference = r"""Step 1: Solvate  [-+.0-9a-z]+
-    Creating a cubic supercell 10.0 Å on a side with a density of 1.0 g/mL"""
-
-    result = instance.description_text(
-        {
-            'method': 'cubic',
-            'size of cubic cell': '10.0 Å',
-            'submethod': 'density',
-            'density': '1.0 g/mL'
-        }
-    )
-
-    # print(result)
-
-    assert re.fullmatch(reference, result) is not None
-
-
-def test_description_text_cubic_nmolecules(instance):
-    """Test the description text"""
-
-    reference = r"""Step 1: Solvate  [-+.0-9a-z]+
-    Creating a cubic supercell 10.0 Å on a side containing 50 molecules"""
-
-    result = instance.description_text(
-        {
-            'method': 'cubic',
-            'size of cubic cell': '10.0 Å',
-            'submethod': 'number of molecules',
-            'number of molecules': '50'
-        }
-    )
-
-    # print(result)
-
-    assert re.fullmatch(reference, result) is not None
-
-
-def test_description_text_cubic_natoms(instance):
-    """Test the description text"""
-
-    reference = r"""Step 1: Solvate  [-+.0-9a-z]+
-    Creating a cubic supercell 10.0 Å on a side containing about 2000 atoms"""
-
-    result = instance.description_text(
-        {
-            'method': 'cubic',
-            'size of cubic cell': '10.0 Å',
-            'submethod': 'approximate number of atoms',
-            'approximate number of atoms': '2000'
-        }
-    )
-
-    # print(result)
-
-    assert re.fullmatch(reference, result) is not None
-
-
-def test_description_text_volume_nmolecules(instance):
-    """Test the description text"""
-
-    reference = r"""Step 1: Solvate  [-+.0-9a-z]+
-    Creating a cubic supercell with a volume of 1000\.0 Å\^3 containing 50
-    molecules"""
-
-    result = instance.description_text(
-        {
-            'method': 'volume',
-            'volume': '1000.0 Å^3',
-            'submethod': 'number of molecules',
-            'number of molecules': '50'
-        }
-    )
-
-    # print(result)
-
-    assert re.fullmatch(reference, result) is not None
-
-
-def test_description_text_nmolecules_volume(instance):
-    """Test the description text"""
-
-    reference = r"""Step 1: Solvate  [-+.0-9a-z]+
-    Creating a cubic supercell containing 50 molecules with a volume of 1000\.0
-    Å\^3"""
-
-    result = instance.description_text(
-        {
-            'method': 'number of molecules',
-            'number of molecules': '50',
-            'submethod': 'volume',
-            'volume': '1000.0 Å^3'
-        }
-    )
-
-    # print(result)
-
-    assert re.fullmatch(reference, result) is not None
-
-
-def test_description_text_natoms_cubic(instance):
-    """Test the description text"""
-
-    reference = r"""Step 1: Solvate  [-+.0-9a-z]+
-    Creating a cubic supercell containing about 999 atoms in a cell 10.0 Å on a
-    side"""
-
-    result = instance.description_text(
-        {
-            'method': 'approximate number of atoms',
-            'approximate number of atoms': '999',
-            'submethod': 'cubic',
-            'size of cubic cell': '10.0 Å'
-        }
-    )
-
-    # print(result)
-
-    assert re.fullmatch(reference, result) is not None
-
-
-def test_description_text_method_error(instance):
-    """Test the description text"""
-
-    with pytest.raises(RuntimeError, match=r"Don't recognize the method junk"):
-        instance.description_text(
-            {
-                'method': 'junk'
-            }
-        )
-
-
-def test_description_text_submethod_error(instance):
-    """Test the description text"""
-
-    with pytest.raises(
-            RuntimeError, match=r"Don't recognize the submethod junk"
-    ):
-        instance.description_text(
-            {
-                'method': 'number of molecules',
-                'number of molecules': '50',
-                'submethod': 'junk'
-            }
-        )
