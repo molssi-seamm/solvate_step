@@ -53,5 +53,3 @@ def test_description_text_default(instance):
         ),
         text
     ) is not None
-
-
