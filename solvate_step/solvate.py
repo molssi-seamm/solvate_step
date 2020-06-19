@@ -401,9 +401,10 @@ class Solvate(seamm.Node):
 
         solvent_atoms = solvent_system['atoms']
         for molecule_id in range(n_molecules):
+            first_atom = len(atoms['elements'])
             for key in atoms:
                 if key in solvent_atoms:
-                    if key == 'atom_types':
+                    if key == 'atom_types' or key == 'charges':
                         types = atoms[key]
                         solvent_types = solvent_atoms[key]
                         for type_ in types:
@@ -417,8 +418,8 @@ class Solvate(seamm.Node):
                     logger.warning(key + 'not in solvent_system.atoms')
                     for i in range(n_solvent_atoms):
                         atoms[key].append('')
-            for bond in solvent_system['bonds']:
-                system['bonds'].append(bond)
+            for i, j, order in solvent_system['bonds']:
+                system['bonds'].append([first_atom + i, first_atom + j, order])
 
         # And the new coordinates
         atoms['coordinates'] = new_structure['atoms']['coordinates']
